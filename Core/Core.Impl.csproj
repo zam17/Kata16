@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="BookRuleMatcher.cs" />
     <Compile Include="CreatePackingSlipCommand.cs" />
+    <Compile Include="ProductTypeEvaluator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PaymentProcessor.cs" />
     <Compile Include="RuleMatcherRepository.cs" />

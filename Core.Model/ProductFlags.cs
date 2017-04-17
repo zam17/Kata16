@@ -5,6 +5,7 @@ namespace Core.Model
     [Flags]
     public enum ProductFlags
     {
-        IsPhysical = 1,
+        None = 0,
+        Physical = 1,
     }
 }
