@@ -4,11 +4,11 @@ namespace Core.Interfaces
 {
     public class CommandSet
     {
-        public CommandSet(ICommand[] commands)
+        public CommandSet(IPaymentProcessingCommand[] commands)
         {
             Commands = commands;
         }
 
-        public IReadOnlyCollection<ICommand> Commands { get; }
+        public IReadOnlyCollection<IPaymentProcessingCommand> Commands { get; }
     }
 }

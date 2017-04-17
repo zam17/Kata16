@@ -43,6 +43,7 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandSet.cs" />
     <Compile Include="IPaymentProcessor.cs" />
+    <Compile Include="IProductTypeEvaluator.cs" />
     <Compile Include="IRuleMatcher.cs" />
     <Compile Include="IRuleMatcherRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

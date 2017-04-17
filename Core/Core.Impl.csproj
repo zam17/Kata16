@@ -40,8 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BookRuleMatcher.cs" />
+    <Compile Include="CreatePackingSlipCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PaymentProcessor.cs" />
+    <Compile Include="RuleMatcherRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core.Interfaces\Core.Interfaces.csproj">

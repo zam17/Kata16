@@ -4,6 +4,6 @@ namespace Core.Interfaces
 {
     public interface IRuleMatcher
     {
-        ICommand[] MatchPaymentCommands(Payment payment);
+        IPaymentProcessingCommand[] MatchPaymentCommands(Payment payment);
     }
 }

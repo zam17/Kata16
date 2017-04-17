@@ -20,7 +20,7 @@ namespace Core.Impl
         public CommandSet ProcessPayment(Payment payment)
         {
             IReadOnlyCollection<IRuleMatcher> ruleMatchers = _ruleMatcherRepository.GetRuleMatchers();
-            ICommand[] commands = ruleMatchers.SelectMany(p => p.MatchPaymentCommands(payment)).ToArray();
+            IPaymentProcessingCommand[] commands = ruleMatchers.SelectMany(p => p.MatchPaymentCommands(payment)).ToArray();
             CommandSet ret =  new CommandSet(commands);
             return ret;
         }
