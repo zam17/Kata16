@@ -11,7 +11,10 @@ namespace Core.Tests
         [TestMethod]
         public void Returns_Empty_CommandsSet_For_Zero_Products_Payment()
         {
-            PaymentProcessor rp = new PaymentProcessor();
+            var ruleMatcherRepositoryMock = new Moq.Mock<IRuleMatcherRepository>();
+            ruleMatcherRepositoryMock.Setup(p => p.GetRuleMatchers()).Returns(new IRuleMatcher[0]);
+
+            PaymentProcessor rp = new PaymentProcessor(ruleMatcherRepositoryMock.Object);
             Payment emptyPayment = new Payment();
             CommandSet commandsSet = rp.ProcessPayment(emptyPayment);
 
