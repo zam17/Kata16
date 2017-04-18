@@ -1,8 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Core.Impl;
+using Core.Impl.ProcessingCommands;
+using Core.Impl.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Core.Model;
 using Core.Interfaces;
+using Core.Interfaces.Data;
 using Moq;
 
 namespace Core.Tests
@@ -10,34 +14,144 @@ namespace Core.Tests
     [TestClass]
     public class RulesProcessorTests
     {
-        [TestMethod]
-        public void Returns_Empty_CommandsSet_For_Zero_Products_Payment()
+        public RulesProcessorTests()
         {
-            Mock<IRuleMatcherRepository> ruleMatcherRepositoryMock = new Moq.Mock<IRuleMatcherRepository>();
-            ruleMatcherRepositoryMock.Setup(p => p.GetRuleMatchers()).Returns(new IRuleMatcher[0]);
+            _product = new Product(new ProductCategory[0], ProductFlags.None, "Sample product");
+            _purchase = new Purchase(new[] { _product }, new Payment());
+        }
 
-            PaymentProcessor rp = new PaymentProcessor(ruleMatcherRepositoryMock.Object);
-            Payment emptyPayment = new Payment(new Product[0], new PaymentOption(), new PaymentSum());
+        private readonly Product _product;
+        private readonly Purchase _purchase;
 
-            PaymentCommandSet paymentCommandsSet = rp.ProcessPayment(emptyPayment);
+        [TestMethod]
+        public void Returns_Empty_CommandsSet_For_Zero_Products_Purchase()
+        {
+            Mock<IBusinessRuleMatcherRepository> ruleMatcherRepositoryMock = new Mock<IBusinessRuleMatcherRepository>();
+            ruleMatcherRepositoryMock.Setup(p => p.GetRuleMatchers()).Returns(new IBusinessRuleMatcher[0]);
 
-            Assert.AreEqual(0, paymentCommandsSet.Commands.Count);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(ruleMatcherRepositoryMock.Object, commandComparerRepository);
+            Purchase emptyPurchase = new Purchase(new Product[0], new Payment());
+
+            PurchaseCommandSet purchaseCommandsSet = rp.ProcessPurchase(emptyPurchase);
+
+            Assert.AreEqual(0, purchaseCommandsSet.Commands.Count);
         }
 
         [TestMethod]
-        public void Returns_GeneratePackingSlip_For_Book_Payment()
+        public void Returns_CreateDuplicatePackingSlipCommand_For_Book_Purchase()
         {
-            IProductTypeEvaluator evaluator = new ProductTypeEvaluator();
-            IRuleMatcherRepository repository = new RuleMatcherRepository(evaluator);
-            PaymentProcessor rp = new PaymentProcessor(repository);
+            Mock<IProductTypeEvaluator> evaluator = new Mock<IProductTypeEvaluator>();
+            evaluator.Setup(p => p.IsBook(_product)).Returns(true);
 
-            Product book = new Product(new [] {new ProductCategory("Books")}, ProductFlags.None);
-            Payment bookPayment = new Payment(new [] {book}, new PaymentOption(), new PaymentSum());
+            IBusinessRuleMatcherRepository repository = new BusinessRuleMatcherRepository(evaluator.Object);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(repository, commandComparerRepository);
 
-            PaymentCommandSet paymentCommandSet = rp.ProcessPayment(bookPayment);
+            PurchaseCommandSet purchaseCommandSet = rp.ProcessPurchase(_purchase);
 
-            Assert.AreEqual(1, paymentCommandSet.Commands.Count);
-            Assert.IsInstanceOfType(paymentCommandSet.Commands.Single(), typeof(CreateDuplicatePackingSlipCommand));
+            Assert.AreEqual(1, purchaseCommandSet.Commands.OfType<CreateDuplicatePackingSlipCommand>().Count());
+        }
+
+        [TestMethod]
+        public void Returns_ActivateMembershipCommand_For_Book_Purchase()
+        {
+            Mock<IProductTypeEvaluator> evaluator = new Mock<IProductTypeEvaluator>();
+            evaluator.Setup(p => p.IsMembershipActivation(_product)).Returns(true);
+
+            IBusinessRuleMatcherRepository repository = new BusinessRuleMatcherRepository(evaluator.Object);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(repository, commandComparerRepository);
+
+            PurchaseCommandSet purchaseCommandSet = rp.ProcessPurchase(_purchase);
+
+            ActivateMembershipCommand[] activateMembership = purchaseCommandSet.Commands.OfType<ActivateMembershipCommand>().ToArray();
+            Assert.AreEqual(1, activateMembership.Length);
+        }
+
+        [TestMethod]
+        public void Returns_UpgradeMembershipCommand_For_Book_Purchase()
+        {
+            Mock<IProductTypeEvaluator> evaluator = new Mock<IProductTypeEvaluator>();
+            evaluator.Setup(p => p.IsMembershipActivation(_product)).Returns(true);
+
+            IBusinessRuleMatcherRepository repository = new BusinessRuleMatcherRepository(evaluator.Object);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(repository, commandComparerRepository);
+
+            PurchaseCommandSet purchaseCommandSet = rp.ProcessPurchase(_purchase);
+
+            Assert.AreEqual(1, purchaseCommandSet.Commands.Count);
+            Assert.IsInstanceOfType(purchaseCommandSet.Commands.Single(), typeof(ActivateMembershipCommand));
+        }
+
+        [TestMethod]
+        public void Returns_CreatePackagingSlipCommand_For_Book_Purchase()
+        {
+            Mock<IProductTypeEvaluator> evaluator = new Mock<IProductTypeEvaluator>();
+            evaluator.Setup(p => p.IsPhysical(_product)).Returns(true);
+
+            IBusinessRuleMatcherRepository repository = new BusinessRuleMatcherRepository(evaluator.Object);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(repository, commandComparerRepository);
+
+            PurchaseCommandSet purchaseCommandSet = rp.ProcessPurchase(_purchase);
+
+            Assert.AreEqual(1, purchaseCommandSet.Commands.OfType<CreatePackagingSlipCommand>().Count());
+        }
+
+        [TestMethod]
+        public void Returns_OnlyOneGenerateSlipCommand_For_Luxury_Book_Purchase()
+        {
+            Mock<IProductTypeEvaluator> evaluator = new Mock<IProductTypeEvaluator>();
+            evaluator.Setup(p => p.IsLuxury(_product)).Returns(true);
+            evaluator.Setup(p => p.IsBook(_product)).Returns(true);
+
+            IBusinessRuleMatcherRepository repository = new BusinessRuleMatcherRepository(evaluator.Object);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(repository, commandComparerRepository);
+
+            PurchaseCommandSet purchaseCommandSet = rp.ProcessPurchase(_purchase);
+
+            Assert.AreEqual(1, purchaseCommandSet.Commands.OfType<CreatePackagingSlipCommand>().Count());
+        }
+
+
+        [TestMethod]
+        public void Returns_MultipleCommands_For_Purchase_With_Single_Product_Matching_Multiple_BusinessRules()
+        {
+            Mock<IProductTypeEvaluator> evaluator = new Mock<IProductTypeEvaluator>();
+            evaluator.Setup(p => p.IsPhysical(_product)).Returns(true);
+            evaluator.Setup(p => p.IsBook(_product)).Returns(true);
+
+            IBusinessRuleMatcherRepository repository = new BusinessRuleMatcherRepository(evaluator.Object);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(repository, commandComparerRepository);
+
+            PurchaseCommandSet purchaseCommandSet = rp.ProcessPurchase(_purchase);
+
+            Assert.IsTrue(purchaseCommandSet.Commands.Count > 1);
+        }
+
+        [TestMethod]
+        public void Returns_CommandsBoundForDifferentProducts_For_PurchaseWithMultipleProducts()
+        {
+            Product product1 = new Product(new ProductCategory[0], ProductFlags.None, String.Empty);
+            Product product2 = new Product(new ProductCategory[0], ProductFlags.None, String.Empty);
+
+            Purchase purchase = new Purchase(new[] { product1, product2 }, new Payment());
+
+            Mock<IProductTypeEvaluator> evaluator = new Mock<IProductTypeEvaluator>();
+            evaluator.Setup(p => p.IsPhysical(product1)).Returns(true);
+            evaluator.Setup(p => p.IsBook(It.IsAny<Product>())).Returns(true);
+
+            IBusinessRuleMatcherRepository repository = new BusinessRuleMatcherRepository(evaluator.Object);
+            ICommandComparerRepository commandComparerRepository = new CommandComparerRepository();
+            PurchaseProcessor rp = new PurchaseProcessor(repository, commandComparerRepository);
+
+            PurchaseCommandSet purchaseCommandSet = rp.ProcessPurchase(purchase);
+
+            Assert.AreEqual(2, purchaseCommandSet.Commands.OfType<IProductBoundPurchaseProcessingCommand>().Select(p => p.Product).Distinct().Count());
         }
     }
 }

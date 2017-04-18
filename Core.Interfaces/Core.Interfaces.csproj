@@ -40,13 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command.cs" />
-    <Compile Include="PaymentCommandSet.cs" />
+    <Compile Include="IPurchaseProcessingCommandComparer.cs" />
+    <Compile Include="IPurchaseProcessingCommand.cs" />
+    <Compile Include="Data\PaymentCommandSet.cs" />
     <Compile Include="IPaymentProcessor.cs" />
     <Compile Include="IProductTypeEvaluator.cs" />
-    <Compile Include="IRuleMatcher.cs" />
-    <Compile Include="IRuleMatcherRepository.cs" />
+    <Compile Include="IBusinessRuleMatcher.cs" />
+    <Compile Include="IProductBoundPurchaseProcessingCommand.cs" />
+    <Compile Include="IRuleMatcherRepository - Copy.cs" />
+    <Compile Include="ICommandComparerRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Data\PurchaseBusinessRulesProcessingContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core.Model\Core.Model.csproj">

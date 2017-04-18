@@ -3,7 +3,8 @@ using System.Text;
 
 namespace Core.Interfaces
 {
-    public interface IPaymentProcessingCommand
+    public interface IPurchaseProcessingCommand
     {
+        void Process();
     }
 }

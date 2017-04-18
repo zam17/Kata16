@@ -1,9 +1,10 @@
-﻿using Core.Model;
+﻿using Core.Interfaces.Data;
+using Core.Model;
 
 namespace Core.Interfaces
 {
-    public interface IPaymentProcessor
+    public interface IPurchaseProcessor
     {
-        PaymentCommandSet ProcessPayment(Payment payment);
+        PurchaseCommandSet ProcessPurchase(Purchase purchase);
     }
 }
