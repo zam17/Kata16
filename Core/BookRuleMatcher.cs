@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Core.Interfaces;
 using Core.Model;
@@ -13,10 +14,10 @@ namespace Core.Impl
             _evaluator = evaluator;
         }
 
-        public IPaymentProcessingCommand[] MatchPaymentCommands(Payment payment)
+        public IReadOnlyCollection<IPaymentProcessingCommand> MatchPaymentCommands(Payment payment)
         {
-            IPaymentProcessingCommand[] ret = payment.Products.Where(p => _evaluator.IsBook(p))
-                .Select(p => new CreatePackingSlipCommand(p)).ToArray();
+            CreateDuplicatePackingSlipCommand[] ret = payment.Products.Where(p => _evaluator.IsBook(p))
+                .Select(p => new CreateDuplicatePackingSlipCommand(p)).ToArray();
             return ret;
         }
     }

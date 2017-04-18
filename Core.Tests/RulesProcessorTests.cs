@@ -19,9 +19,9 @@ namespace Core.Tests
             PaymentProcessor rp = new PaymentProcessor(ruleMatcherRepositoryMock.Object);
             Payment emptyPayment = new Payment(new Product[0], new PaymentOption(), new PaymentSum());
 
-            CommandSet commandsSet = rp.ProcessPayment(emptyPayment);
+            PaymentCommandSet paymentCommandsSet = rp.ProcessPayment(emptyPayment);
 
-            Assert.AreEqual(0, commandsSet.Commands.Count);
+            Assert.AreEqual(0, paymentCommandsSet.Commands.Count);
         }
 
         [TestMethod]
@@ -34,10 +34,10 @@ namespace Core.Tests
             Product book = new Product(new [] {new ProductCategory("Books")}, ProductFlags.None);
             Payment bookPayment = new Payment(new [] {book}, new PaymentOption(), new PaymentSum());
 
-            CommandSet commandSet = rp.ProcessPayment(bookPayment);
+            PaymentCommandSet paymentCommandSet = rp.ProcessPayment(bookPayment);
 
-            Assert.AreEqual(1, commandSet.Commands.Count);
-            Assert.IsInstanceOfType(commandSet.Commands.Single(), typeof(CreatePackingSlipCommand));
+            Assert.AreEqual(1, paymentCommandSet.Commands.Count);
+            Assert.IsInstanceOfType(paymentCommandSet.Commands.Single(), typeof(CreateDuplicatePackingSlipCommand));
         }
     }
 }

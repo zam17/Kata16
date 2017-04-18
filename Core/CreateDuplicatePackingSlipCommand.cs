@@ -8,9 +8,9 @@ using Core.Model;
 
 namespace Core.Impl
 {
-    public class CreatePackingSlipCommand:IPaymentProcessingCommand
+    public class CreateDuplicatePackingSlipCommand:IPaymentProcessingCommand
     {
-        public CreatePackingSlipCommand(Product product)
+        public CreateDuplicatePackingSlipCommand(Product product)
         {
             Product = product;
         }

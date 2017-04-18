@@ -17,11 +17,11 @@ namespace Core.Impl
             _ruleMatcherRepository = ruleMatcherRepository;
         }
 
-        public CommandSet ProcessPayment(Payment payment)
+        public PaymentCommandSet ProcessPayment(Payment payment)
         {
             IReadOnlyCollection<IRuleMatcher> ruleMatchers = _ruleMatcherRepository.GetRuleMatchers();
             IPaymentProcessingCommand[] commands = ruleMatchers.SelectMany(p => p.MatchPaymentCommands(payment)).ToArray();
-            CommandSet ret =  new CommandSet(commands);
+            PaymentCommandSet ret =  new PaymentCommandSet(commands, payment);
             return ret;
         }
     }

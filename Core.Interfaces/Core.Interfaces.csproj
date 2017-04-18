@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command.cs" />
-    <Compile Include="CommandSet.cs" />
+    <Compile Include="PaymentCommandSet.cs" />
     <Compile Include="IPaymentProcessor.cs" />
     <Compile Include="IProductTypeEvaluator.cs" />
     <Compile Include="IRuleMatcher.cs" />

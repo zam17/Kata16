@@ -4,6 +4,6 @@ namespace Core.Interfaces
 {
     public interface IPaymentProcessor
     {
-        CommandSet ProcessPayment(Payment payment);
+        PaymentCommandSet ProcessPayment(Payment payment);
     }
 }

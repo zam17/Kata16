@@ -1,13 +1,17 @@
 ﻿using System.Collections.Generic;
+using Core.Model;
 
 namespace Core.Interfaces
 {
-    public class CommandSet
+    public class PaymentCommandSet
     {
-        public CommandSet(IPaymentProcessingCommand[] commands)
+        public PaymentCommandSet(IPaymentProcessingCommand[] commands, Payment payment)
         {
             Commands = commands;
+            Payment = payment;
         }
+
+        public Payment Payment { get; }
 
         public IReadOnlyCollection<IPaymentProcessingCommand> Commands { get; }
     }
